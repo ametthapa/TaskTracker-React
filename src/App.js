@@ -1,8 +1,16 @@
 import { useState } from "react"
-import Header from './components/Header'
-import Task from './components/Task'
 
-function App() {
+
+import { BrowserRouter as Router, Route } from 'react-router-dom'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import Tasks from './components/Tasks'
+import AddTask from './components/AddTask'
+import About from './components/About'
+ 
+const App = () => {
+  const [showAddTask, setShowAddTask] = useState(false)
+
   const [tasks, setTask] = useState([
     {
         id: 1,
@@ -24,12 +32,63 @@ function App() {
     },
 ])
 
+//Add Task
+const addTask = (task) =>{
+  const id = Math.floor(Math.random() * 10000)+1
+  const newTask = { id, ...task}
+  setTask([...tasks, newTask])
+}
+
+//Del;ete TAsk
+const deleteTask = (id) =>{
+  setTask(
+    tasks.filter((task) =>
+      task.id !== id 
+    )
+  )
+}
+
+// Toggle Remainder value
+const toggleRemainder =(id) =>{
+  setTask(
+    tasks.map((task) => 
+      task.id === id ? { ...task, remainder:
+        !task.remainder } : task 
+    )
+  )
+}
+
   return (
-    <div className="container">
-      <Header />
-      <Task tasks={ tasks } />
-      
-    </div>
+    <Router>
+      <div className="container">
+        <Header
+          onAdd={() => setShowAddTask(!showAddTask)}
+          showAdd={showAddTask}
+        />
+
+        <Route
+          path="/"
+          exact
+          render={(props) => (
+            <>
+              {showAddTask && <AddTask onAdd={addTask} />}
+              {tasks.length > 0 ? (
+                <Tasks
+                  tasks={tasks}
+                  onDelete={deleteTask}
+                  onToggle={toggleRemainder}
+                />
+              ) : (
+                "No Task To Show"
+              )}
+            </>
+          )}
+        />
+
+        <Route path="/about" component={About} />
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
